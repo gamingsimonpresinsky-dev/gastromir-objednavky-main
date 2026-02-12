@@ -15,50 +15,44 @@
     <main class="max-w-6xl mx-auto mt-10 p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
         
         <div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-blue-500">
-            <h2 class="text-2xl font-bold mb-4 text-blue-900">Obedové menu - 4 Týždne</h2>
-            <div id="weeklyMenu" class="space-y-4 text-sm max-h-[600px] overflow-y-auto pr-2">
-                <p class="text-gray-400 italic">Načítavam aktuálne menu cez AI...</p>
+            <h2 class="text-2xl font-bold mb-4 text-blue-900 italic underline">Týždenné menu</h2>
+            <div id="weeklyMenu" class="space-y-4">
+                <p class="text-gray-400">Načítavam menu...</p>
             </div>
         </div>
 
         <div id="userSection" class="bg-white p-8 rounded-3xl shadow-lg h-fit">
             <div id="authBox">
-                <h2 class="text-2xl font-bold mb-6 text-gray-800">Prístup k objednávkam</h2>
+                <h2 class="text-2xl font-bold mb-6">Prístup k objednávkam</h2>
                 <div class="flex gap-4 mb-6">
-                    <button onclick="showLogin()" class="flex-1 bg-gray-200 py-3 rounded-xl font-bold hover:bg-gray-300 transition">Prihlásiť sa</button>
-                    <button onclick="showRegister()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 transition">Vytvoriť účet</button>
+                    <button onclick="showLogin()" class="flex-1 bg-gray-200 py-3 rounded-xl font-bold hover:bg-gray-300">Prihlásiť sa</button>
+                    <button onclick="showRegister()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700">Vytvoriť účet</button>
                 </div>
-                
-                <div id="authForm" class="space-y-4 text-center">
-                    <p class="text-gray-500 italic font-medium">Pre zobrazenie dnešnej ponuky sa prihláste alebo si vytvorte účet.</p>
+                <div id="authForm" class="space-y-4 text-center text-gray-500 italic">
+                    Vyberte si prosím možnosť vyššie.
                 </div>
             </div>
 
             <div id="orderBox" class="hidden">
-                <h2 id="welcomeText" class="text-3xl font-bold mb-2 text-gray-800">Vitaj!</h2>
-                <p class="text-green-600 font-bold mb-6 text-lg">Dnešná ponuka pre teba:</p>
+                <h2 id="welcomeText" class="text-2xl font-bold mb-2">Vitaj!</h2>
+                <p class="text-green-600 font-bold mb-6">Dnešná ponuka (podľa dňa):</p>
                 
-                <div class="bg-gray-50 p-6 rounded-2xl mb-6 border border-gray-200">
-                    <label class="block text-sm font-bold text-gray-600 mb-2">Vyberte si jedlo:</label>
-                    <select id="foodSelect" class="w-full p-3 rounded-xl border-2 border-gray-200 outline-none focus:border-green-500 transition">
-                        <option>Menu A: Načítavam dnešnú ponuku...</option>
-                        <option>Menu B: Načítavam dnešnú ponuku...</option>
-                        <option>Menu C: Načítavam dnešnú ponuku...</option>
-                    </select>
+                <div class="bg-gray-50 p-6 rounded-2xl mb-6 border">
+                    <select id="foodSelect" class="w-full p-3 rounded-xl border-2 outline-none focus:border-green-500">
+                        </select>
 
-                    <div id="timeField" class="hidden mt-6 animate-pulse">
-                        <label class="block text-sm font-bold text-gray-600 mb-2">Čas doručenia:</label>
-                        <input type="time" class="w-full p-3 border-2 border-green-500 rounded-xl outline-none">
-                        <p class="text-[10px] text-green-600 mt-2 font-bold uppercase tracking-widest text-center">Vyberte čas a potvrďte</p>
+                    <div id="timeField" class="hidden mt-6">
+                        <label class="block text-sm font-bold mb-2 uppercase">Čas doručenia:</label>
+                        <input type="time" class="w-full p-3 border-2 border-green-500 rounded-xl">
                     </div>
                 </div>
 
                 <div class="flex flex-col gap-3">
-                    <button id="orderBtn" onclick="confirmOrder()" class="w-full bg-green-600 text-white py-5 rounded-2xl font-black text-xl shadow-xl hover:bg-green-700 transition transform hover:scale-[1.02]">
+                    <button id="orderBtn" onclick="confirmOrder()" class="w-full bg-green-600 text-white py-5 rounded-2xl font-black text-xl hover:bg-green-700 transition shadow-lg">
                         OBJEDNAŤ
                     </button>
-                    <button onclick="logout()" class="w-full bg-red-50 text-red-600 py-3 rounded-2xl font-bold hover:bg-red-100 transition text-sm">
-                        NIE / Odhlásiť sa
+                    <button onclick="logout()" class="w-full bg-red-50 text-red-600 py-3 rounded-2xl font-bold">
+                        Odhlásiť sa
                     </button>
                 </div>
             </div>
@@ -67,137 +61,114 @@
 
     <script>
         const API_URL = 'https://gastromir-objednavky-api-production.up.railway.app';
+        let globalMenu = {};
 
-        // 1. Načítanie menu po otvorení stránky
         window.onload = async () => {
             try {
-                const res = await fetch(`${API_URL}/generate-master-menu`);
-                const menu = await res.json();
+                const res = await fetch(`${API_URL}/get-fixed-menu`);
+                globalMenu = await res.json();
+                
                 const menuDiv = document.getElementById('weeklyMenu');
                 menuDiv.innerHTML = "";
-
-                // Prejdeme všetky 4 týždne
-                for (let i = 1; i <= 4; i++) {
-                    const weekKey = `week${i}`;
-                    const weekData = menu[weekKey];
-                    
-                    let weekHtml = `<div class="mb-8"><h3 class="font-black text-blue-800 text-lg border-b-2 border-blue-100 mb-4 uppercase tracking-tighter italic">${i}. TÝŽDEŇ</h3>`;
-                    
-                    for (const [den, jedla] of Object.entries(weekData)) {
-                        weekHtml += `
-                            <div class="mb-3 pl-2 border-l-4 border-gray-100">
-                                <strong class="capitalize text-gray-800 text-xs">${den}:</strong>
-                                <ul class="text-[11px] text-gray-500 leading-tight">
-                                    <li>• ${jedla[0]}</li>
-                                    <li>• ${jedla[1]}</li>
-                                    <li>• ${jedla[2]}</li>
-                                </ul>
-                            </div>`;
-                    }
-                    weekHtml += `</div>`;
-                    menuDiv.innerHTML += weekHtml;
+                
+                for (const [den, jedla] of Object.entries(globalMenu)) {
+                    menuDiv.innerHTML += `
+                        <div class="mb-4 p-2 border-l-4 border-blue-200">
+                            <strong class="capitalize text-blue-800">${den}:</strong>
+                            <ul class="text-xs text-gray-600 ml-4">
+                                <li>• ${jedla[0]}</li>
+                                <li>• ${jedla[1]}</li>
+                                <li>• ${jedla[2]}</li>
+                            </ul>
+                        </div>`;
                 }
+                setTodayMenu();
             } catch (e) {
-                document.getElementById('weeklyMenu').innerHTML = "<p class='text-red-500 font-bold'>Nepodarilo sa načítať menu zo servera.</p>";
+                console.error("Chyba načítania menu");
             }
         };
 
-        // 2. Registrácia
-        async function handleRegister() {
-            const data = {
-                name: document.getElementById('regName').value,
-                phone: document.getElementById('regPhone').value,
-                password: document.getElementById('regPass').value,
-                address: document.getElementById('regAddr').value
-            };
+        function setTodayMenu() {
+            const dni = ["nedeľa", "pondelok", "utorok", "streda", "štvrtok", "piatok", "sobota"];
+            const dnesNazov = dni[new Date().getDay()];
+            const foodSelect = document.getElementById('foodSelect');
+            const orderBtn = document.getElementById('orderBtn');
 
-            if(!data.phone || !data.password) return alert("Vyplňte aspoň telefón a heslo!");
-
-            try {
-                const res = await fetch(`${API_URL}/register`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                const result = await res.json();
-                if (result.success) {
-                    alert("Účet vytvorený! Teraz sa prihláste.");
-                    showLogin();
-                } else {
-                    alert("Chyba: " + result.error);
-                }
-            } catch (e) {
-                alert("Server neodpovedá.");
+            if (globalMenu[dnesNazov]) {
+                const jedla = globalMenu[dnesNazov];
+                foodSelect.innerHTML = `
+                    <option>A: ${jedla[0]}</option>
+                    <option>B: ${jedla[1]}</option>
+                    <option>C: ${jedla[2]}</option>
+                `;
+            } else {
+                foodSelect.innerHTML = `<option>Cez víkend nevaríme</option>`;
+                orderBtn.disabled = true;
+                orderBtn.classList.add('opacity-50');
             }
         }
 
-        // 3. Prihlásenie
+        async function handleRegister() {
+            const phone = document.getElementById('regPhone').value;
+            const name = document.getElementById('regName').value;
+            const password = document.getElementById('regPass').value;
+            const address = document.getElementById('regAddr').value;
+
+            const res = await fetch(`${API_URL}/register`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ phone, name, password, address })
+            });
+            const result = await res.json();
+            if(result.success) { alert("Hotovo! Prihláste sa."); showLogin(); }
+            else { alert(result.error); }
+        }
+
         async function handleLogin() {
             const phone = document.getElementById('loginPhone').value;
             const password = document.getElementById('loginPass').value;
 
-            try {
-                const res = await fetch(`${API_URL}/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone, password })
-                });
-                const result = await res.json();
-                
-                if (result.success) {
-                    document.getElementById('authBox').classList.add('hidden');
-                    document.getElementById('orderBox').classList.remove('hidden');
-                    document.getElementById('welcomeText').innerText = `Vitaj, ${result.user.name}!`;
-                } else {
-                    alert("Nesprávne údaje!");
-                }
-            } catch (e) {
-                alert("Chyba pripojenia.");
-            }
+            const res = await fetch(`${API_URL}/login`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ phone, password })
+            });
+            const result = await res.json();
+            if(result.success) {
+                document.getElementById('authBox').classList.add('hidden');
+                document.getElementById('orderBox').classList.remove('hidden');
+                document.getElementById('welcomeText').innerText = `Vitaj, ${result.user.name}!`;
+                setTodayMenu();
+            } else { alert("Chyba prihlásenia"); }
         }
 
-        // Pomocné UI funkcie
         function showRegister() {
             document.getElementById('authForm').innerHTML = `
-                <div class="space-y-3 animate-fadeIn">
-                    <input id="regName" type="text" placeholder="Vaše Meno" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 transition">
-                    <input id="regPhone" type="text" placeholder="Telefónne číslo" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 transition">
-                    <input id="regPass" type="password" placeholder="Heslo" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 transition">
-                    <input id="regAddr" type="text" placeholder="Adresa doručenia" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 transition">
-                    <button onclick="handleRegister()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg">Vytvoriť Účet</button>
-                </div>
-            `;
+                <div class="space-y-3">
+                    <input id="regName" type="text" placeholder="Meno" class="w-full p-3 border rounded-xl">
+                    <input id="regPhone" type="text" placeholder="Telefón" class="w-full p-3 border rounded-xl">
+                    <input id="regPass" type="password" placeholder="Heslo" class="w-full p-3 border rounded-xl">
+                    <input id="regAddr" type="text" placeholder="Adresa" class="w-full p-3 border rounded-xl">
+                    <button onclick="handleRegister()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Zaregistrovať</button>
+                </div>`;
         }
 
         function showLogin() {
             document.getElementById('authForm').innerHTML = `
-                <div class="space-y-3 animate-fadeIn">
-                    <input id="loginPhone" type="text" placeholder="Telefónne číslo" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 transition">
-                    <input id="loginPass" type="password" placeholder="Heslo" class="w-full p-4 border-2 rounded-2xl outline-none focus:border-blue-500 transition">
-                    <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-4 rounded-2xl font-black uppercase tracking-widest shadow-lg">Vstúpiť</button>
-                </div>
-            `;
+                <div class="space-y-3">
+                    <input id="loginPhone" type="text" placeholder="Telefón" class="w-full p-3 border rounded-xl">
+                    <input id="loginPass" type="password" placeholder="Heslo" class="w-full p-3 border rounded-xl">
+                    <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Vstúpiť</button>
+                </div>`;
         }
 
         function confirmOrder() {
-            const timeField = document.getElementById('timeField');
-            if(timeField.classList.contains('hidden')) {
-                timeField.classList.remove('hidden');
-                document.getElementById('orderBtn').innerText = "POTVRDIŤ OBJEDNÁVKU";
-            } else {
-                alert("Objednávka bola úspešne odoslaná! Algoritmus zaznamenal váš výber.");
-                logout();
-            }
+            const field = document.getElementById('timeField');
+            if(field.classList.contains('hidden')) { field.classList.remove('hidden'); }
+            else { alert("Objednávka odoslaná!"); logout(); }
         }
 
-        function logout() {
-            location.reload();
-        }
+        function logout() { location.reload(); }
     </script>
-
-    <style>
-        .animate-fadeIn { animation: fadeIn 0.3s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
 </body>
 </html>
