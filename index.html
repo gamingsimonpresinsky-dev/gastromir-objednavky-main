@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <title>GASTROMIR | Objednávky</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <header class="bg-white p-4 shadow flex justify-between items-center px-10">
+        <img src="logo-gastromir.png" alt="GASTROMIR" class="h-10">
+        <img src="logo-mts.png" alt="MTS" class="h-8">
+    </header>
+
+    <main class="max-w-6xl mx-auto mt-10 p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-blue-500">
+            <h2 class="text-2xl font-bold mb-4 text-blue-900">Obedové menu - Týždeň 1</h2>
+            <div id="weeklyMenu" class="space-y-4 text-sm">
+                <p class="text-gray-400 italic">Načítavam aktuálne menu...</p>
+            </div>
+        </div>
+
+        <div id="userSection" class="bg-white p-8 rounded-3xl shadow-lg">
+            <div id="authBox">
+                <h2 class="text-2xl font-bold mb-6">Prístup k objednávkam</h2>
+                <div class="flex gap-4 mb-6">
+                    <button onclick="showLogin()" class="flex-1 bg-gray-200 py-2 rounded-xl font-bold">Prihlásiť sa</button>
+                    <button onclick="showRegister()" class="flex-1 bg-blue-600 text-white py-2 rounded-xl font-bold">Vytvoriť účet</button>
+                </div>
+                
+                <div id="authForm" class="space-y-4">
+                    <p class="text-gray-500">Vyberte si prosím možnosť vyššie.</p>
+                </div>
+            </div>
+
+            <div id="orderBox" class="hidden">
+                <h2 id="welcomeText" class="text-2xl font-bold mb-2">Vitaj, meno!</h2>
+                <p class="text-green-600 font-bold mb-6">Dnešná ponuka pre teba:</p>
+                <div class="bg-gray-50 p-4 rounded-2xl mb-6">
+                    <select id="foodSelect" class="w-full p-2 rounded-lg border">
+                        <option>Menu A: Kurací steak</option>
+                        <option>Menu B: Šošovicový prívarok</option>
+                        <option>Menu C: Pizza Margherita</option>
+                    </select>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="confirmOrder()" class="flex-1 bg-green-600 text-white py-4 rounded-2xl font-bold shadow-lg">OBJEDNAŤ</button>
+                    <button onclick="logout()" class="bg-red-100 text-red-600 px-6 py-4 rounded-2xl font-bold">NIE / Odhlásiť</button>
+                </div>
+                <div id="timeField" class="hidden mt-4">
+                    <label class="block text-xs font-bold mb-1">Čas doručenia:</label>
+                    <input type="time" class="w-full p-2 border rounded-lg">
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Logika prepínania okien
+        function showRegister() {
+            document.getElementById('authForm').innerHTML = `
+                <input id="regName" type="text" placeholder="Meno" class="w-full p-3 border rounded-xl">
+                <input id="regPhone" type="text" placeholder="Telefónne číslo" class="w-full p-3 border rounded-xl">
+                <input id="regPass" type="password" placeholder="Heslo" class="w-full p-3 border rounded-xl">
+                <input id="regAddr" type="text" placeholder="Adresa doručenia" class="w-full p-3 border rounded-xl">
+                <button onclick="handleRegister()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Zaregistrovať sa</button>
+            `;
+        }
+
+        function showLogin() {
+            document.getElementById('authForm').innerHTML = `
+                <input id="loginPhone" type="text" placeholder="Telefónne číslo" class="w-full p-3 border rounded-xl">
+                <input id="loginPass" type="password" placeholder="Heslo" class="w-full p-3 border rounded-xl">
+                <button onclick="handleLogin()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold">Vstúpiť</button>
+            `;
+        }
+
+        async function handleLogin() {
+            // Tu zavoláš Railway API /login
+            // Ak úspešné:
+            document.getElementById('authBox').classList.add('hidden');
+            document.getElementById('orderBox').classList.remove('hidden');
+        }
+
+        function confirmOrder() {
+            document.getElementById('timeField').classList.remove('hidden');
+        }
+
+        function logout() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>
